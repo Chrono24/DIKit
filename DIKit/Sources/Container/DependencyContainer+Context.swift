@@ -19,4 +19,12 @@ extension DependencyContainer {
         }
         self.root = root
     }
+
+    public static func isDefined() -> Bool {
+        return self.root != nil
+    }
+
+    public static func reset() {
+        self.root = nil
+    }
 }
