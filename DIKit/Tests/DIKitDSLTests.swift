@@ -220,7 +220,7 @@ class DIKitDSLTests: XCTestCase {
 
         // if E is a singleton created at startup:
         // * the counter must be zero before the "defined" call
-        // * 1 immediately after defining the containter
+        // * 1 immediately after defining the container
         // * stay 1 after every inject
         // * and each inject must be the same pointer
         XCTAssert(countA == 0)
