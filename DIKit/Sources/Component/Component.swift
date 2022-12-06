@@ -10,19 +10,22 @@
 public typealias ComponentFactory = () -> Any
 
 class Component<T>: ComponentProtocol {
+    let createdAtStart: Bool
     let lifetime: Lifetime
     let identifier: AnyHashable
     let type: Any.Type
     let componentFactory: ComponentFactory
 
-    init(lifetime: Lifetime, factory: @escaping () -> T) {
+    init(createdAtStart: Bool, lifetime: Lifetime, factory: @escaping () -> T) {
+        self.createdAtStart = createdAtStart
         self.lifetime = lifetime
         self.identifier = ComponentIdentifier(type: T.self)
         self.type = T.self
         self.componentFactory = { factory() }
     }
 
-    init(lifetime: Lifetime, tag: AnyHashable, factory: @escaping () -> T) {
+    init(createdAtStart: Bool, lifetime: Lifetime, tag: AnyHashable, factory: @escaping () -> T) {
+        self.createdAtStart = createdAtStart
         self.lifetime = lifetime
         self.identifier = ComponentIdentifier(tag: tag, type: T.self)
         self.type = T.self
@@ -54,6 +57,7 @@ extension ComponentIdentifier {
 }
 
 public protocol ComponentProtocol {
+    var createdAtStart: Bool { get }
     var lifetime: Lifetime { get }
     var identifier: AnyHashable { get }
     var componentFactory: ComponentFactory { get }
