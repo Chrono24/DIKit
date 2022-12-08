@@ -24,7 +24,8 @@ extension DependencyContainer {
             return instanceOfComponent
         }
         let instance = foundComponent.componentFactory() as! T
-        // make write threadSafe to prevent returning an instance that is not in the map and concurrent map access crashes.
+        // make write threadSafe to prevent returning an instance that is not in the map
+        // and concurrent map access crashes.
         // do not lock the whole method to minimise chance of deadlocks. Everything else here is readonly.
         threadSafe {
             self.instanceStack[identifier] = instance
