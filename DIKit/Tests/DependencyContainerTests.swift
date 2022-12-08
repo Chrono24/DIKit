@@ -63,6 +63,7 @@ class DependencyContainerTests: XCTestCase {
     }
 
     func testDependencyContainerReset() {
+        DependencyContainer.root = nil
         XCTAssert(!DependencyContainer.isDefined())
 
         struct ComponentA {}
