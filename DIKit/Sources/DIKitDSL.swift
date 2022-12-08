@@ -37,30 +37,41 @@ public func modules(@ModulesBuilder makeChildren: () -> [DependencyContainer]) -
     DependencyContainer.derive(from: makeChildren())
 }
 
-public func resolvable<T>(lifetime: Lifetime = .singleton, _ factory: @escaping () -> T) -> ComponentProtocol {
-    Component(lifetime: lifetime, factory: factory) as ComponentProtocol
+public func resolvable<T>(createdAtStart: Bool,
+                          lifetime: Lifetime = .singleton,
+                          _ factory: @escaping () -> T) -> ComponentProtocol {
+    Component(createdAtStart: createdAtStart,
+              lifetime: lifetime,
+              factory: factory) as ComponentProtocol
 }
 
 public func resolvable<T>(
+    createdAtStart: Bool,
     lifetime: Lifetime = .singleton,
     tag: AnyHashable,
     _ factory: @escaping () -> T
 ) -> ComponentProtocol {
-    Component(lifetime: lifetime, tag: tag, factory: factory) as ComponentProtocol
+    Component(createdAtStart: createdAtStart,
+              lifetime: lifetime,
+              tag: tag,
+              factory: factory) as ComponentProtocol
 }
 
 public func factory<T>(factory: @escaping () -> T) -> [ComponentProtocol] {
-    [resolvable(lifetime: .factory, factory)]
+    [resolvable(createdAtStart: false, lifetime: .factory, factory)]
 }
 
 public func factory<T>(tag: AnyHashable, factory: @escaping () -> T) -> [ComponentProtocol] {
-    [resolvable(lifetime: .factory, tag: tag, factory)]
+    [resolvable(createdAtStart: false, lifetime: .factory, tag: tag, factory)]
 }
 
-public func single<T>(factory: @escaping () -> T) -> [ComponentProtocol] {
-    [resolvable(lifetime: .singleton, factory)]
+public func single<T>(createdAtStart: Bool = false,
+                      factory: @escaping () -> T) -> [ComponentProtocol] {
+    [resolvable(createdAtStart: createdAtStart, lifetime: .singleton, factory)]
 }
 
-public func single<T>(tag: AnyHashable, factory: @escaping () -> T) -> [ComponentProtocol] {
-    [resolvable(lifetime: .singleton, tag: tag, factory)]
+public func single<T>(createdAtStart: Bool = false,
+                      tag: AnyHashable,
+                      factory: @escaping () -> T) -> [ComponentProtocol] {
+    [resolvable(createdAtStart: createdAtStart, lifetime: .singleton, tag: tag, factory)]
 }

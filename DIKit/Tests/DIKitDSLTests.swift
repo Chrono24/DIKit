@@ -167,4 +167,98 @@ class DIKitDSLTests: XCTestCase {
         XCTAssertEqual(componentAinstanceAobjectIdA, componentAinstanceAobjectIdB)
         XCTAssertEqual(componentAinstanceAobjectIdA, componentAinstanceBobjectId)
     }
+
+    func testSingletonCreatedAtStartDSL() {
+        DependencyContainer.root = nil
+        func ptr(_ object: AnyObject) -> UnsafeMutableRawPointer {
+            Unmanaged.passUnretained(object).toOpaque()
+        }
+
+        var countA = 0
+        var countB = 0
+        var countD = 0
+        var countE = 0
+
+        class ComponentA {
+            init(_ counter: inout Int) {
+                counter += 1
+            }
+        }
+        class ComponentB {
+            init(_ counter: inout Int) {
+                counter += 1
+            }
+        }
+        class ComponentC { }
+        class ComponentD {
+            init(_ counter: inout Int) {
+                counter += 1
+            }
+        }
+        class ComponentE {
+            init(_ counter: inout Int) {
+                counter += 1
+            }
+        }
+
+        let subModule2 = module {
+            factory { ComponentD(&countD) }
+            single(createdAtStart: true) { ComponentE(&countE) }
+        }
+
+        let subModule1 = modules {
+            subModule2
+            module { single { ComponentC() } }
+        }
+
+        let rootModule = modules {
+            module {
+                single(createdAtStart: true, tag: "test") { ComponentA(&countA) }
+                single { ComponentB(&countB) }
+            }
+            subModule1
+        }
+
+        // if E is a singleton created at startup:
+        // * the counter must be zero before the "defined" call
+        // * 1 immediately after defining the container
+        // * stay 1 after every inject
+        // * and each inject must be the same pointer
+        XCTAssert(countA == 0)
+        XCTAssert(countB == 0)
+        XCTAssert(countD == 0)
+        XCTAssert(countE == 0)
+        DependencyContainer.defined(by: rootModule)
+        XCTAssert(countA == 1)
+        XCTAssert(countE == 1)
+
+        @Inject var ce1: ComponentE
+        @Inject var ce2: ComponentE
+        XCTAssert(countE == 1)
+        XCTAssert(ptr(ce1) == ptr(ce2))
+
+        // countA must stay 1 since it is a singleton created at start
+        XCTAssert(countA == 1)
+        @Inject(tag: "test") var ca1: ComponentA
+        XCTAssert(countA == 1)
+        @Inject(tag: "test") var ca2: ComponentA
+        XCTAssert(countA == 1)
+        XCTAssert(ptr(ca1) == ptr(ca2))
+
+        // B is a regular singleton and must not exist before first inject
+        XCTAssert(countB == 0)
+        @Inject var cb1: ComponentB
+        XCTAssert(countB == 1)
+        @Inject var cb2: ComponentB
+        XCTAssert(countB == 1)
+        XCTAssert(ptr(cb1) == ptr(cb2))
+
+        // D is factory managed. Counter must increase.
+        XCTAssert(countD == 0)
+        @Inject var cd1: ComponentD
+        XCTAssert(countD == 1)
+        @Inject var cd2: ComponentD
+        XCTAssert(countD == 2)
+        XCTAssert(ptr(cd1) != ptr(cd2))
+    }
 }

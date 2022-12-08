@@ -13,8 +13,12 @@ extension DependencyContainer {
     /// - Parameters:
     ///     - lifetime: The *scope* of the `Component`, defaults to `Lifetime.singleton`.
     ///     - factory: The *factory* for the initialization of the `Component`.
-    public func register<T>(lifetime: Lifetime = .singleton, _ factory: @escaping () -> T) {
-        let component = Component(lifetime: lifetime, factory: factory)
+    public func register<T>(createdAtStart: Bool = false,
+                            lifetime: Lifetime = .singleton,
+                            _ factory: @escaping () -> T) {
+        let component = Component(createdAtStart: createdAtStart,
+                                  lifetime: lifetime,
+                                  factory: factory)
         register(component)
     }
 
@@ -24,8 +28,14 @@ extension DependencyContainer {
     ///   - lifetime: The *scope* of the `Component`, defaults to `Lifetime.singleton`.
     ///   - tag: A *tag* for the `Component` used to identify it.
     ///   - factory: The *factory* for the initialization of the `Component`.
-    public func register<T>(lifetime: Lifetime = .singleton, tag: AnyHashable, _ factory: @escaping () -> T) {
-        let component = Component(lifetime: lifetime, tag: tag, factory: factory)
+    public func register<T>(createdAtStart: Bool = false,
+                            lifetime: Lifetime = .singleton,
+                            tag: AnyHashable,
+                            _ factory: @escaping () -> T) {
+        let component = Component(createdAtStart: createdAtStart,
+                                  lifetime: lifetime,
+                                  tag: tag,
+                                  factory: factory)
         register(component)
     }
 

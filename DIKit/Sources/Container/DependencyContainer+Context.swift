@@ -18,5 +18,10 @@ extension DependencyContainer {
             fatalError("It is not allowed to override the `root` DependencyContainer at runtime.")
         }
         self.root = root
+
+        // instantiate components that have their createdAtStart flag set
+        for comp in root.componentStack.values where comp.createdAtStart {
+            root.instanceStack[comp.identifier] = comp.componentFactory()
+        }
     }
 }
