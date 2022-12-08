@@ -169,6 +169,7 @@ class DIKitDSLTests: XCTestCase {
     }
 
     func testSingletonCreatedAtStartDSL() {
+        DependencyContainer.root = nil
         func ptr(_ object: AnyObject) -> UnsafeMutableRawPointer {
             Unmanaged.passUnretained(object).toOpaque()
         }
