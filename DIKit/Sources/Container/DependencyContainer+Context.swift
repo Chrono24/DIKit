@@ -21,7 +21,12 @@ extension DependencyContainer {
 
         // instantiate components that have their createdAtStart flag set
         for comp in root.componentStack.values where comp.createdAtStart {
-            root.instanceStack[comp.identifier] = comp.componentFactory()
+            // instantiating a component can cascade and instantiate children
+            // we must not overwrite these entries, and have to always test if they already
+            // exist as a consequence of a previous parent instantiation
+            if root.instanceStack[comp.identifier] == nil {
+                root.instanceStack[comp.identifier] = comp.componentFactory()
+            }
         }
     }
 }
