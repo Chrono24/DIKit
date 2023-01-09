@@ -12,25 +12,24 @@ extension DependencyContainer {
     /// - Parameter tag: An optional *tag* to identify the Component. `nil` per default.
     /// - Returns: The resolved `Optional<Component<T>>`.
     func _resolve<T>(tag: AnyHashable? = nil) -> T? {
-        let identifier = ComponentIdentifier(tag: tag, type: T.self)
-        guard let foundComponent = self.componentStack[identifier] else {
-            return nil
-        }
-        if foundComponent.lifetime == .factory {
-            return foundComponent.componentFactory() as? T
-        }
-        if let instanceOfComponent = self.instanceStack[identifier] as? T {
-            return instanceOfComponent
-        }
-        // make write threadSafe to prevent returning an instance that is not in the map
-        // and concurrent map access crashes.
-        // do not lock the whole method to minimise chance of deadlocks. Everything else here is readonly.
+        var result: T? = nil
         threadSafe {
-            if instanceStack[identifier] == nil {
-                instanceStack[identifier] = foundComponent.componentFactory()
+            let identifier = ComponentIdentifier(tag: tag, type: T.self)
+
+            if let foundComponent = self.componentStack[identifier] {
+                if foundComponent.lifetime == .factory {
+                    result = foundComponent.componentFactory() as? T
+                } else {
+                    if let instanceOfComponent = self.instanceStack[identifier] as? T {
+                        result = instanceOfComponent
+                    } else {
+                        instanceStack[identifier] = foundComponent.componentFactory()
+                        result = instanceStack[identifier] as? T
+                    }
+                }
             }
         }
-        return instanceStack[identifier] as? T
+        return result
     }
 
     /// Checks whether `Component<T>` is resolvable by looking it up in the
