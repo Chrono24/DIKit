@@ -12,7 +12,7 @@ extension DependencyContainer {
     /// - Parameter tag: An optional *tag* to identify the Component. `nil` per default.
     /// - Returns: The resolved `Optional<Component<T>>`.
     func _resolve<T>(tag: AnyHashable? = nil) -> T? {
-        var result: T? = nil
+        var result: T?
         threadSafe {
             let identifier = ComponentIdentifier(tag: tag, type: T.self)
 
