@@ -10,6 +10,35 @@ import XCTest
 @testable import DIKit
 
 class DIKitDSLTests: XCTestCase {
+
+    func randomBranch() -> Bool {
+        if Int.random(in: 0..<100) > 50 {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    func testIfStatementsInModuleBuilder() {
+        struct ComponentA {}
+        struct ComponentB {}
+        struct ComponentC {}
+
+        // compilation must fail if ModuleBuilder doesn't support if statements
+        let dependencyContainer = module {
+            single { ComponentA() }
+            if randomBranch() { // prevent compiler from optimising out the whole if statement
+                single(tag: "first") { ComponentB() }
+            } else {
+                single(tag: "second") { ComponentC() }
+            }
+        }
+
+        // registrations of B and C are non-deterministic, but we only care about compilation anyway
+        let componentA: ComponentA = dependencyContainer.resolve()
+        XCTAssertNotNil(componentA)
+    }
+
     func testDependencyContainerDeriveDSL() {
         struct ComponentA {}
         struct ComponentB {}

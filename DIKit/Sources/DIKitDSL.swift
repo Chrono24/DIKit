@@ -16,6 +16,18 @@ public struct ModuleBuilder {
     public static func buildBlock(_ component: [ComponentProtocol]) -> [ComponentProtocol] {
         component
     }
+
+    static func buildOptional(_ component: [ComponentProtocol]?) -> [ComponentProtocol] {
+        component ?? []
+    }
+
+    static func buildEither(first component: [ComponentProtocol]) -> [ComponentProtocol] {
+        component
+    }
+
+    static func buildEither(second component: [ComponentProtocol]) -> [ComponentProtocol] {
+        component
+    }
 }
 
 public func module(@ModuleBuilder makeChildren: () -> [ComponentProtocol]) -> DependencyContainer {
