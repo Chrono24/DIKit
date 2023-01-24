@@ -13,18 +13,28 @@ extension DependencyContainer {
     /// - Returns: The resolved `Optional<Component<T>>`.
     func _resolve<T>(tag: AnyHashable? = nil) -> T? {
         var result: T?
-        threadSafe {
-            let identifier = ComponentIdentifier(tag: tag, type: T.self)
+        let identifier = ComponentIdentifier(tag: tag, type: T.self)
+        result = _resolve(identifier: identifier) as? T
+        return result
+    }
 
+    /// Resolves a component from an identifier.
+    /// Non-generic version, so we can use it for other purposes, e.g. threadsafe createdAtStart instantiation
+    /// - Parameter identifier: the identifier to use for the instantiation
+    /// - Returns: The resolved `Optional<Component<T>>`.
+    @discardableResult
+    func _resolve(identifier: AnyHashable) -> Any? {
+        var result: Any?
+        threadSafe {
             if let foundComponent = self.componentStack[identifier] {
                 if foundComponent.lifetime == .factory {
-                    result = foundComponent.componentFactory() as? T
+                    result = foundComponent.componentFactory()
                 } else {
-                    if let instanceOfComponent = self.instanceStack[identifier] as? T {
+                    if let instanceOfComponent = self.instanceStack[identifier] {
                         result = instanceOfComponent
                     } else {
                         instanceStack[identifier] = foundComponent.componentFactory()
-                        result = instanceStack[identifier] as? T
+                        result = instanceStack[identifier]
                     }
                 }
             }
