@@ -62,6 +62,25 @@ class DependencyContainerTests: XCTestCase {
         XCTAssertNotNil(componentA)
     }
 
+    func testDependencyContainerReset() {
+        DependencyContainer.root = nil
+        XCTAssert(!DependencyContainer.isDefined())
+
+        struct ComponentA {}
+
+        let dependencyContainer = DependencyContainer { (c: DependencyContainer) in
+            c.register { ComponentA() }
+        }
+
+        DependencyContainer.defined(by: dependencyContainer)
+
+        XCTAssert(DependencyContainer.isDefined())
+
+        DependencyContainer.reset()
+
+        XCTAssert(!DependencyContainer.isDefined())
+    }
+
     func testDependencyContainerDerive() {
         struct ComponentA {}
         struct ComponentB {}
