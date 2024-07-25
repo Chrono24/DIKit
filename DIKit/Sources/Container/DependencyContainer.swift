@@ -30,6 +30,11 @@ public final class DependencyContainer {
         return root
     }
 
+    // MARK: - Configuration
+    /// A global flag to allow duplicate registrations of components.
+    /// Should only be used in a debug context, like in a mock setup for Previews. Should not be used in a release build.
+    public static var allowOverrides: Bool = false
+
     // MARK: - Public methods
     /// Derives a `DependencyContainer` from multiple sub containers.
     ///
@@ -40,7 +45,11 @@ public final class DependencyContainer {
     public static func derive(from containers: DependencyContainer...) -> DependencyContainer {
         return DependencyContainer(containers.reduce(into: ComponentStack()) { (result, container) in
             result.merge(container.componentStack) { (old, new) -> ComponentProtocol in
-                fatalError("A `Component` was declared at least twice `\(old)` -> `\(new)`.")
+                if DependencyContainer.allowOverrides {
+                    new
+                } else {
+                    fatalError("A `Component` was declared at least twice `\(old)` -> `\(new)`.")
+                }
             }
         })
     }
@@ -54,7 +63,11 @@ public final class DependencyContainer {
     public static func derive(from containers: [DependencyContainer]) -> DependencyContainer {
         return DependencyContainer(containers.reduce(into: ComponentStack()) { (result, container) in
             result.merge(container.componentStack) { (old, new) -> ComponentProtocol in
-                fatalError("A `Component` was declared at least twice `\(old)` -> `\(new)`.")
+                if DependencyContainer.allowOverrides {
+                    new
+                } else {
+                    fatalError("A `Component` was declared at least twice `\(old)` -> `\(new)`.")
+                }
             }
         })
     }
