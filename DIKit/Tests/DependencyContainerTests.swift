@@ -163,4 +163,34 @@ class DependencyContainerTests: XCTestCase {
         XCTAssertTrue(componentAinstanceA !== taggedComponentAinstanceA)
         XCTAssertTrue(componentAinstanceA !== taggedComponentAinstanceB)
     }
+
+    func testDependencyOverride() {
+        protocol TestComponentProtocol {
+            var id: Int { get }
+        }
+        struct ComponentA: TestComponentProtocol {
+            let id: Int
+        }
+
+        // Setting allowOverrides to false should run into a fatalError, which sadly is not that easy to test.
+        DependencyContainer.allowOverrides = true
+        let dependencyContainer =
+                modules(makeChildren: {
+                    module {
+                        single { ComponentA(id: 1) }
+                        single { ComponentA(id: 2) }
+                        single { ComponentA(id: 3) as TestComponentProtocol }
+                    }
+                    module {
+                        single { ComponentA(id: 4) as TestComponentProtocol }
+                    }
+                })
+
+        let componentA: ComponentA = dependencyContainer.resolve()
+        let componentB: TestComponentProtocol = dependencyContainer.resolve()
+        XCTAssertNotNil(componentA)
+        XCTAssertNotNil(componentB)
+        XCTAssertEqual(componentA.id, 2)
+        XCTAssertEqual(componentB.id, 4)
+    }
 }
